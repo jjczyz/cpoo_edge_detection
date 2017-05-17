@@ -12,8 +12,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
 /**
- * Klasa reprezentuj¹ca algorytm Cannyego do detekcji krawiêdzi obrazu
- * @author Ewelina Wardach, Konrad Karaœ
+ * Klasa reprezentujï¿½ca algorytm Cannyego do detekcji krawiï¿½dzi obrazu
+ * @author Ewelina Wardach, Konrad Karaï¿½
  *
  */
 public class CannyAlgorithm {
@@ -23,7 +23,7 @@ public class CannyAlgorithm {
 	//Standardowy parametr rozmycia gaussa
 	float gaussParameter = 159;
 	
-	//Operator filtracji Krzy¿ Robertska
+	//Operator filtracji Krzyï¿½ Robertska
 	float[] robertsKernel1 = { 1, 0, 0, -1};
 	float[] robertsKernel2 = { 0, 1, -1, 0};
 	
@@ -53,13 +53,13 @@ public class CannyAlgorithm {
 	Color blackColor;
 	int blackRGB;
 	
-	//Zmienne do okreœlania stopnia luminacji pikseli
+	//Zmienne do okreï¿½lania stopnia luminacji pikseli
 	float lumination[];
 	float derivativeLumination[][];
 	
 	/**
-	 * £adowanie pliku z obrazem
-	 * @param imageFile plik zawieraj¹cy obraz
+	 * ï¿½adowanie pliku z obrazem
+	 * @param imageFile plik zawierajï¿½cy obraz
 	 */
 	private void loadImage(File imageFile){
 		try {
@@ -86,7 +86,7 @@ public class CannyAlgorithm {
 	}
 	
 	/**
-	 * Przetwarzanie obrazu: zastosowanie operatora Prewitt (uwydatnienie krawiêdzi)
+	 * Przetwarzanie obrazu: zastosowanie operatora Prewitt (uwydatnienie krawiï¿½dzi)
 	 */
 	private void applyPrewittFilter(){
 		BufferedImageOp op = new ConvolveOp (new Kernel(3,3,prewittKernel1));
@@ -103,7 +103,7 @@ public class CannyAlgorithm {
 	}
 	
 	/**
-	 * Przetwarzanie obrazu: zastosowanie operatora Sobel (uwydatnienie krawiêdzi)
+	 * Przetwarzanie obrazu: zastosowanie operatora Sobel (uwydatnienie krawiï¿½dzi)
 	 */
 	private void applySobelFilter(){
 		BufferedImageOp op = new ConvolveOp (new Kernel(3,3,sobelKernel1));
@@ -120,7 +120,7 @@ public class CannyAlgorithm {
 	}
 	
 	/**
-	 * Przetwarzanie obrazu: zastosowanie operatora Krzy¿ Robertsa (uwydatnienie krawiêdzi)
+	 * Przetwarzanie obrazu: zastosowanie operatora Krzyï¿½ Robertsa (uwydatnienie krawiï¿½dzi)
 	 */
 	private void applyRobertsFilter(){
 		BufferedImageOp op = new ConvolveOp (new Kernel(2,2,robertsKernel1));
@@ -156,9 +156,9 @@ public class CannyAlgorithm {
 	}
 	
 	/**
-	 * Rysowanie krawêdzi na podstawie progowania histerez¹
-	 * @param x wspó³rzêdna X piksela odniesienia
-	 * @param y wspó³rzêdna Y piksela odniesienia
+	 * Rysowanie krawï¿½dzi na podstawie progowania histerezï¿½
+	 * @param x wspï¿½rzï¿½dna X piksela odniesienia
+	 * @param y wspï¿½rzï¿½dna Y piksela odniesienia
 	 */
 	private void drawEdges(int x, int y){
 		int cell[][] = new int[9][3];
@@ -199,14 +199,44 @@ public class CannyAlgorithm {
 		else
 			image.setRGB(x, y, blackRGB);
 	}
-			
+	/**
+	 * Rysowanie krawÄ™dzi przy pomocy prostego algorytmu
+	 */
+	private void drawEdgesSimple() {
+
+		BufferedImage imageCopy = new BufferedImage(image.getWidth(),image.getHeight(),BufferedImage.TYPE_INT_RGB);
+		for(int x=1; x<(image.getWidth()-1); x++)
+		{
+			for(int y=1; y<(image.getHeight()-1); y++)
+			{
+				cellColor[0] = new Color(image.getRGB(x-1, y));
+				cellColor[1] = new Color(image.getRGB(x+1, y));
+				cellColor[2] = new Color(image.getRGB(x, y-1));
+				cellColor[3] = new Color(image.getRGB(x, y+1));
+
+				for(int i=0; i<4;i++)
+				{
+					red[i] = cellColor[i].getRed();
+					green[i] = cellColor[i].getGreen();
+					blue[i] = cellColor[i].getBlue();
+					lumination[i] = (red[i]+green[i]+blue[i])/3;
+				}
+				if(Math.abs(lumination[0]-lumination[1]) + Math.abs(lumination[2]-lumination[3]) > thresholdLow){
+					imageCopy.setRGB(x,y,whiteRGB);
+				}
+				else
+					imageCopy.setRGB(x,y,blackRGB);
+			}
+		}
+		image = imageCopy;
+	}
 			
 	/**
 	 * Uruchomienie procesu przetwarzania obrazu
 	 * @param imageFile plik z obrazem
-	 * @param parameters parametry nastawione przez u¿ytkownika
+	 * @param parameters parametry nastawione przez uï¿½ytkownika
 	 */
-	public void run(File imageFile, Object[] parameters){
+	public void run(File imageFile, Object[] parameters, boolean useSimple){
 		
 		this.loadImage(imageFile);
 		
@@ -224,7 +254,7 @@ public class CannyAlgorithm {
 		case "Sobel":
 			this.applySobelFilter();
 			break;
-		case "Krzy¿ Robertsa":
+		case "Krzyï¿½ Robertsa":
 			this.applyRobertsFilter();
 			break;
 		case "Brak filtru":
@@ -237,22 +267,32 @@ public class CannyAlgorithm {
 		whiteRGB = whiteColor.getRGB();
 		blackColor = new Color(0,0,0);
 		blackRGB = blackColor.getRGB();
-		
-		cellColor = new Color[3];
-		red = new int[3];
-		green = new int[3];
-		blue = new int[3];
-		lumination = new float[3];
-		derivativeLumination = new float[image.getWidth()][image.getHeight()];
-		
-		this.calculateDerivativeLumination();
-		
-		for(int x=1; x<derivativeLumination.length - 1; x++){
-			for(int y=1; y<derivativeLumination[x].length - 1; y++){
-				this.drawEdges(x,y);
+		if(useSimple)
+		{
+			cellColor = new Color[4];
+			red = new int[4];
+			green = new int[4];
+			blue = new int[4];
+			lumination = new float[4];
+			drawEdgesSimple();
+		}
+		else
+		{
+			cellColor = new Color[3];
+			red = new int[3];
+			green = new int[3];
+			blue = new int[3];
+			lumination = new float[3];
+			derivativeLumination = new float[image.getWidth()][image.getHeight()];
+
+			this.calculateDerivativeLumination();
+
+			for(int x=1; x<derivativeLumination.length - 1; x++){
+				for(int y=1; y<derivativeLumination[x].length - 1; y++){
+					this.drawEdges(x,y);
+				}
 			}
 		}
-		
 		new ImageFrame(image, filterType);
-	}	
+	}
 }

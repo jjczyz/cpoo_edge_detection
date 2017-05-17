@@ -10,8 +10,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
- * Klasa reprezentuj¹ca g³ówn¹ ramkê programu
- * @author Ewelina Wardach, Konrad Karaœ
+ * Klasa reprezentujï¿½ca gï¿½ï¿½wnï¿½ ramkï¿½ programu
+ * @author Ewelina Wardach, Konrad Karaï¿½
  *
  */
 public class MainFrame extends JFrame implements ActionListener {
@@ -19,17 +19,18 @@ public class MainFrame extends JFrame implements ActionListener {
 	ImageLoader imageLoader;
 	JButton startButton;
 	SliderPanel sliderPanel;
-	Checkbox originalImageCheckbox;
+	Checkbox originalImageCheckbox, simpleAlgorithmCheckbox;
 	
 	CannyAlgorithm cannyAlgorithm = new CannyAlgorithm();
 	
 	public MainFrame(){
-		super("Detektor krawêdzi");
+		super("Detektor krawï¿½dzi");
 		
 		imageLoader = new ImageLoader();
 		sliderPanel = new SliderPanel();
 		startButton = new JButton("Konwertuj");
-		originalImageCheckbox = new Checkbox("Poka¿ orygina³");
+		originalImageCheckbox = new Checkbox("Pokaï¿½ oryginaï¿½");
+		simpleAlgorithmCheckbox = new Checkbox("Prosty algorytm");
 		
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -40,7 +41,7 @@ public class MainFrame extends JFrame implements ActionListener {
 		c.gridwidth = 2;
 		add(imageLoader,c);
 		c.gridwidth = 1;
-		c.gridheight = 2;
+		c.gridheight = 3;
 		c.gridx = 0;
 		c.gridy = 1;
 		add(sliderPanel,c);
@@ -50,6 +51,9 @@ public class MainFrame extends JFrame implements ActionListener {
 		add(originalImageCheckbox, c);
 		c.gridx = 1;
 		c.gridy = 2;
+		add(simpleAlgorithmCheckbox, c);
+		c.gridx = 1;
+		c.gridy = 3;
 		add(startButton,c);
 		
 		
@@ -69,10 +73,10 @@ public class MainFrame extends JFrame implements ActionListener {
 			if(imageLoader.imageLoaded()){
 				if(originalImageCheckbox.getState())
 				new ImageFrame(imageLoader.getImageFile());
-				cannyAlgorithm.run(imageLoader.getImageFile(), sliderPanel.getParameters());
+				cannyAlgorithm.run(imageLoader.getImageFile(), sliderPanel.getParameters(), simpleAlgorithmCheckbox.getState());
 			}
 			else{
-				JOptionPane.showMessageDialog(this, "Nie za³adowano pliku!");
+				JOptionPane.showMessageDialog(this, "Nie zaï¿½adowano pliku!");
 			}			
 		}		
 	}
